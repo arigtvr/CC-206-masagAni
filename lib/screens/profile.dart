@@ -27,29 +27,41 @@ class ProfileScreen extends StatelessWidget {
                       fit: BoxFit.cover,
                     ),
                   ),
-                  // Avatar circle centered overlapping — image removed
-                  // Position the avatar fully inside the header so it doesn't
-                  // overlap the white content below. Use a top offset that
-                  // keeps the circle visible within the 160px header.
-                  Positioned(
-                    top: 116,
-                    child: CircleAvatar(
-                      radius: 36,
-                      backgroundColor: Colors.white,
-                      child: CircleAvatar(
-                        radius: 32,
-                        backgroundColor: Colors.green[50],
-                        // Show Alejandro icon image (drop this file into assets/images)
-                        backgroundImage: const AssetImage(
+                  // (avatar moved out of the header Stack so it sits
+                  // inside the white content area below the header)
+                ],
+              ),
+
+              // Small gap between header and avatar placed in the white area
+              const SizedBox(height: 12),
+
+              // Avatar placed inside the white padding above the name so
+              // it does not overlap the header image.
+              Center(
+                child: CircleAvatar(
+                  radius: 36,
+                  backgroundColor: Colors.white,
+                  child: CircleAvatar(
+                    radius: 32,
+                    backgroundColor: Colors.green[50],
+                    // Show the image only once and make it fill the inner
+                    // circle more (zoomed in). Use BoxFit.cover so it looks
+                    // fuller; adjust alignment to avoid cutting shoulders.
+                    child: ClipOval(
+                      child: Padding(
+                        padding: const EdgeInsets.all(2.0), // was 4.0
+                        child: Image.asset(
                           'assets/images/alejandro_icon.png',
+                          fit: BoxFit.contain,
+                          width: 64, // increase from 56
+                          height: 64,
                         ),
                       ),
                     ),
                   ),
-                ],
+                ),
               ),
 
-              // Reduced spacing since the avatar no longer overlaps content
               const SizedBox(height: 12),
 
               // Name and Edit
@@ -102,13 +114,13 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           // Pet image
                           CircleAvatar(
-                            radius: 48,
+                            radius: 64,
                             backgroundColor: Colors.white,
                             child: Image.asset(
                               // Cow avatar for Paddy (drop this file into assets/images)
                               'assets/images/paddy_avatar.png',
-                              width: 76,
-                              height: 76,
+                              width: 112,
+                              height: 112,
                             ),
                           ),
                           const SizedBox(height: 8),
