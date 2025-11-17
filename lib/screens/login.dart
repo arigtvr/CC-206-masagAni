@@ -19,7 +19,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'profile.dart';
+import 'homepage.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -92,11 +92,8 @@ class _LoginScreenState extends State<LoginScreen>
   }
 
   void _submit() {
-    // DEBUG / DEV: bypass real auth and navigate directly into the app.
-    // This lets you work on interior screens while auth is not implemented.
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const ProfileScreen()));
+    // Direct navigation to HomePage (no auth)
+    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
   }
 
   // Utility to compute responsive widths
