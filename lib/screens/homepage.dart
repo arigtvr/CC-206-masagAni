@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'plot_manager.dart';
 
 class HomePage extends StatefulWidget {
 	const HomePage({super.key});
@@ -228,58 +229,75 @@ class _HomePageState extends State<HomePage> {
 								],
 							),
 
-							// move Manage Plots up so it overlaps hero and add stronger shadow
+							// manage plot
 							const SizedBox(height: 15),
 							Transform.translate(
 								offset: const Offset(0, 23),
 								child: Padding(
 									padding: const EdgeInsets.symmetric(horizontal: 18),
-									child: Container(
+									child: SizedBox(
 										width: double.infinity,
-										decoration: BoxDecoration(
-											color: paleYellow,
-											borderRadius: BorderRadius.circular(16),
-											boxShadow: [
-												BoxShadow(color: Colors.black.withOpacity(0.28), blurRadius: 18, offset: const Offset(0, 8)),
-											],
-										),
-										padding: const EdgeInsets.all(16),
-										child: Row(
+										height: 180,
+										child: Stack(
+											clipBehavior: Clip.none,
 											children: [
-												Expanded(
-													child: Column(
-														crossAxisAlignment: CrossAxisAlignment.start,
-														children: [
-															SizedBox(height: _manageTitleTop),
-															Transform.translate(
-																offset: Offset(_manageTitleLeft, 3),
-																child: Text('Check on your plots!', style: TextStyle(fontSize: 18, color: primaryGreen, fontWeight: FontWeight.w700)),
-															),
-															SizedBox(height: _manageButtonTop),
-															Transform.translate(
-																offset: Offset(_manageButtonLeft, 3),
-																child: SizedBox(
-																	height: _manageButtonHeight,
-																	child: ElevatedButton(
-																		onPressed: () {},
-																		style: ElevatedButton.styleFrom(backgroundColor: primaryGreen, shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
-																		child: const Text('Manage Plots', style: TextStyle(color: Colors.white)),
+												// background card
+												Positioned.fill(
+													child: Container(
+														decoration: BoxDecoration(
+															color: paleYellow,
+															borderRadius: BorderRadius.circular(16),
+															boxShadow: [
+																BoxShadow(color: Colors.black.withOpacity(0.28), blurRadius: 18, offset: const Offset(0, 8)),
+															],
+														),
+														padding: const EdgeInsets.all(16),
+														child: Row(
+															children: [
+																Expanded(
+																	child: Column(
+																		crossAxisAlignment: CrossAxisAlignment.start,
+																		children: [
+																			SizedBox(height: _manageTitleTop),
+																			Transform.translate(
+																				offset: Offset(_manageTitleLeft, 0),
+																				child: Text('Check on your plots!', style: TextStyle(fontSize: 18, color: primaryGreen, fontWeight: FontWeight.w700)),
+																			),
+																			SizedBox(height: _manageButtonTop),
+																			Transform.translate(
+																				offset: Offset(_manageButtonLeft, 0),
+																				child: SizedBox(
+																					height: _manageButtonHeight,
+																					child: ElevatedButton(
+																						onPressed: () {
+																							Navigator.of(context).push(MaterialPageRoute(builder: (_) => const PlotManagerPage()));
+																						},
+																						style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFE9BE35), shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8))),
+																						child: const Text('Manage Plots', style: TextStyle(color: Colors.white)),
+																					),
+																				),
+																			),
+																		],
 																	),
 																),
-															),
-														],
+															],
+														),
 													),
 												),
-												const SizedBox(width: 12),
-												SizedBox(
-													width: 120,
-													height: 130,
-													child: Image.asset(
-														'assets/images/manageplot_home.png',
-														fit: BoxFit.contain,
-														errorBuilder: (_, __, ___) => Container(
-															decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(8)),
-															child: const Center(child: Icon(Icons.agriculture, color: primaryGreen, size: 34)),
+												// positioned image that overflows below the card
+												Positioned(
+													right: 1.2,
+													bottom: -140,
+													child: SizedBox(
+														width: 320,
+														height: 440,
+														child: Image.asset(
+															'assets/images/Rectangle 38.png',
+															fit: BoxFit.contain,
+																												errorBuilder: (_, __, ___) => Container(
+																													decoration: BoxDecoration(color: Colors.green[50], borderRadius: BorderRadius.circular(8)),
+																													child: Center(child: Icon(Icons.agriculture, color: primaryGreen, size: 34)),
+																												),
 														),
 													),
 												),
