@@ -66,7 +66,12 @@ flutter:
     - assets/images/welcomepage.png
     - assets/images/loading.jpg
     - assets/images/masagani.png
-    - assets/images/paddy_avatar.png
+    - assets/images/home_bg.jpg
+    - assets/images/masagani_logoname.png
+    - assets/images/educ/rice101.jpg
+    - assets/images/educ/rys_home.jpg
+    - assets/images/Widget_icon.png
+    - assets/images/manageplot_home.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
