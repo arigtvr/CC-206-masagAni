@@ -155,7 +155,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                           borderRadius: BorderRadius.circular(6),
                         ),
                       ),
-                      child: const Text('Save Changes'),
+                      child: const Text(
+                        'Save Changes',
+                        style: TextStyle(color: Colors.white),
+                      ),
                     ),
                   ),
                 ),

@@ -93,7 +93,9 @@ class _LoginScreenState extends State<LoginScreen>
 
   void _submit() {
     // Direct navigation to HomePage (no auth)
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+    Navigator.of(
+      context,
+    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
   }
 
   // Utility to compute responsive widths
