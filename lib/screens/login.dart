@@ -20,6 +20,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'homepage.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -30,6 +31,7 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen>
     with SingleTickerProviderStateMixin {
+  bool _loading = false;
   final _formKey = GlobalKey<FormState>();
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passCtrl = TextEditingController();
@@ -91,9 +93,57 @@ class _LoginScreenState extends State<LoginScreen>
     return null;
   }
 
+<<<<<<< Updated upstream
   void _submit() {
     // Direct navigation to HomePage (no auth)
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+=======
+  Future<void> _submit() async {
+    // Validate inputs first
+    if (!_formKey.currentState!.validate()) return;
+    if (!mounted) return;
+    setState(() => _loading = true);
+
+    final email = _emailCtrl.text.trim();
+    final password = _passCtrl.text;
+
+    try {
+      final userCred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Debugging info
+      // ignore: avoid_print
+      print(
+        'Signed in: uid=${userCred.user?.uid}, email=${userCred.user?.email}',
+      );
+
+      if (!mounted) return;
+      Navigator.of(
+        context,
+      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+    } on FirebaseAuthException catch (e) {
+      final code = e.code;
+      final message = e.message ?? 'Authentication error';
+      // ignore: avoid_print
+      print('FirebaseAuthException: code=$code message=$message');
+      if (!mounted) return;
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Login error [$code]: $message')));
+    } catch (e) {
+      // ignore: avoid_print
+      print('Unexpected login error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
+>>>>>>> Stashed changes
   }
 
   // Utility to compute responsive widths
@@ -103,11 +153,7 @@ class _LoginScreenState extends State<LoginScreen>
     return 300;
   }
 
-  double _computeButtonWidth(double deviceWidth) {
-    if (deviceWidth < 360) return deviceWidth * 0.66;
-    if (deviceWidth < 420) return deviceWidth * 0.58;
-    return 220;
-  }
+  // Button width helper removed (not used while auth is bypassed).
 
   // Social icon builder with hover & tap scale animation
   Widget _buildSocialIcon({
@@ -130,7 +176,6 @@ class _LoginScreenState extends State<LoginScreen>
   Widget build(BuildContext context) {
     // Colors & theme values
     const Color primaryGreen = Color(0xFF099509);
-    final Color primaryGreen75 = primaryGreen.withOpacity(0.75);
     const Color strokeGreen = Color(0xFF77C000);
     const Color hintGray = Color(0xFF9A9292);
     const Color bgBase = Color(0xFFFEFEF1);
@@ -139,7 +184,7 @@ class _LoginScreenState extends State<LoginScreen>
     // Responsive sizes
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double fieldWidth = _computeFieldWidth(deviceWidth);
-    final double buttonWidth = _computeButtonWidth(deviceWidth);
+    // final double buttonWidth = _computeButtonWidth(deviceWidth);
 
     // Text scale factor for accessibility / small screens
     final double textScale = MediaQuery.of(
@@ -323,13 +368,25 @@ class _LoginScreenState extends State<LoginScreen>
                                     borderRadius: BorderRadius.circular(5),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Login',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                child: _loading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
+                                      )
+                                    : const Text(
+                                        'Login',
+                                        style: TextStyle(
+                                          fontSize: 16,
+                                          color: Colors.white,
+                                        ),
+                                      ),
                               ),
                             ),
                           ],
@@ -424,17 +481,8 @@ class _LoginScreenState extends State<LoginScreen>
 class _HoverTapScale extends StatefulWidget {
   final Widget child;
   final VoidCallback? onTap;
-  final double hoverScale;
-  final double tapScale;
-  final Duration duration;
-
-  const _HoverTapScale({
-    required this.child,
-    this.onTap,
-    this.hoverScale = 1.06,
-    this.tapScale = 0.92,
-    this.duration = const Duration(milliseconds: 120),
-  });
+  // internal constants for animation (hover/tap) are defined in state
+  const _HoverTapScale({required this.child, this.onTap});
 
   @override
   State<_HoverTapScale> createState() => _HoverTapScaleState();
@@ -444,25 +492,28 @@ class _HoverTapScaleState extends State<_HoverTapScale>
     with SingleTickerProviderStateMixin {
   double _scale = 1.0;
   bool _hovering = false;
+  static const double _hoverScale = 1.06;
+  static const double _tapScale = 0.92;
+  static const Duration _duration = Duration(milliseconds: 120);
 
   void _onEnter(bool hover) {
     if (!mounted) return;
     setState(() {
       _hovering = hover;
-      _scale = hover ? widget.hoverScale : 1.0;
+      _scale = hover ? _hoverScale : 1.0;
     });
   }
 
   void _onTapDown(TapDownDetails _) {
-    setState(() => _scale = widget.tapScale);
+    setState(() => _scale = _tapScale);
   }
 
   void _onTapUp(TapUpDetails _) {
-    setState(() => _scale = _hovering ? widget.hoverScale : 1.0);
+    setState(() => _scale = _hovering ? _hoverScale : 1.0);
   }
 
   void _onTapCancel() {
-    setState(() => _scale = _hovering ? widget.hoverScale : 1.0);
+    setState(() => _scale = _hovering ? _hoverScale : 1.0);
   }
 
   @override
@@ -475,7 +526,7 @@ class _HoverTapScaleState extends State<_HoverTapScale>
       behavior: HitTestBehavior.translucent,
       child: AnimatedScale(
         scale: _scale,
-        duration: widget.duration,
+        duration: _duration,
         curve: Curves.easeOut,
         child: widget.child,
       ),
