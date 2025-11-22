@@ -1,7 +1,31 @@
 import 'package:flutter/material.dart';
+<<<<<<< Updated upstream
+=======
+import 'package:provider/provider.dart';
+import '../models/streak_model.dart';
+import 'welcome_screen.dart';
+import 'edit_profile.dart';
+import 'homepage.dart';
+>>>>>>> Stashed changes
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // Record an app open for streak tracking when the profile screen appears.
+    // If the provider hasn't been initialized yet, this will still work after init.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final streak = Provider.of<StreakModel>(context, listen: false);
+      streak.recordOpen();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -131,6 +155,7 @@ class ProfileScreen extends StatelessWidget {
                         children: [
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
+<<<<<<< Updated upstream
                             children: const [
                               Text(
                                 '153',
@@ -139,6 +164,31 @@ class ProfileScreen extends StatelessWidget {
                                   color: primaryGreen,
                                   fontWeight: FontWeight.w800,
                                 ),
+=======
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  Consumer<StreakModel>(
+                                    builder: (_, model, __) => Text(
+                                      model.displayStreak.toString(),
+                                      style: TextStyle(
+                                        fontSize: 36,
+                                        color: primaryGreen,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Image.asset(
+                                    'assets/images/grain_streak.png',
+                                    width: 22,
+                                    height: 22,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ],
+>>>>>>> Stashed changes
                               ),
                               SizedBox(height: 4),
                               Text(
@@ -149,6 +199,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.end,
+<<<<<<< Updated upstream
                             children: const [
                               Text(
                                 'Total Agri Points:',
@@ -161,6 +212,29 @@ class ProfileScreen extends StatelessWidget {
                                   color: Colors.black87,
                                   fontWeight: FontWeight.w700,
                                 ),
+=======
+                            children: [
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                children: [
+                                  const Text(
+                                    'Total Agri Points:',
+                                    style: TextStyle(color: Colors.black54),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Consumer<StreakModel>(
+                                    builder: (_, model, __) => Text(
+                                      model.totalPoints.toString(),
+                                      style: TextStyle(
+                                        fontSize: 18,
+                                        color: primaryGreen,
+                                        fontWeight: FontWeight.w900,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+>>>>>>> Stashed changes
                               ),
                             ],
                           ),

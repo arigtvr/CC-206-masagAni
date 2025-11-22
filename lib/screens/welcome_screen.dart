@@ -1,6 +1,7 @@
 // lib/screens/welcome_screen.dart
 import 'package:flutter/material.dart';
 import 'login.dart';
+import 'signup.dart';
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({super.key, required this.title});
@@ -10,12 +11,18 @@ class WelcomeScreen extends StatelessWidget {
     return PageRouteBuilder(
       transitionDuration: const Duration(milliseconds: 550),
       reverseTransitionDuration: const Duration(milliseconds: 400),
-      pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
+      pageBuilder: (context, animation, secondaryAnimation) =>
+          const LoginScreen(),
       transitionsBuilder: (context, animation, secondaryAnimation, child) {
         // Slide from bottom to top with fade
-        final curved = CurvedAnimation(parent: animation, curve: Curves.easeOutCubic);
-        final offsetAnim = Tween<Offset>(begin: const Offset(0.0, 1.0), end: Offset.zero)
-            .animate(curved);
+        final curved = CurvedAnimation(
+          parent: animation,
+          curve: Curves.easeOutCubic,
+        );
+        final offsetAnim = Tween<Offset>(
+          begin: const Offset(0.0, 1.0),
+          end: Offset.zero,
+        ).animate(curved);
         final fadeAnim = Tween<double>(begin: 0.0, end: 1.0).animate(curved);
 
         return SlideTransition(
@@ -57,45 +64,39 @@ class WelcomeScreen extends StatelessWidget {
                       Navigator.of(context).push(_createLoginRoute());
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Color(0xFF099509).withOpacity(0.75),
+                      backgroundColor: Color(0xFF099509).withOpacity(0.75),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),
                     child: const Text(
                       "Login",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                 ),
 
                 const SizedBox(height: 15),
 
-                // SIGN UP BUTTON (same style; navigate to signup when ready)
+                // SIGN UP BUTTON (navigate to signup)
                 SizedBox(
                   width: 220,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
-                      // TODO: Navigate to signup when implemented
+                      Navigator.of(context).push(
+                        MaterialPageRoute(builder: (_) => const SignupScreen()),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor:
-                          Color(0xFF099509).withOpacity(0.75),
+                      backgroundColor: Color(0xFF099509).withOpacity(0.75),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5),
                       ),
                     ),
                     child: const Text(
                       "Sign Up",
-                      style: TextStyle(
-                        fontSize: 16,
-                        color: Colors.white,
-                      ),
+                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                 ),
