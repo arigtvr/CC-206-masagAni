@@ -18,9 +18,16 @@ class PlotManagerPage extends StatelessWidget {
     }) {
       return InkWell(
         onTap: () {
-          Navigator.of(context).push(MaterialPageRoute(
-            builder: (_) => PlotDetailsPage(title: title, variety: variety, age: age, healthy: healthy),
-          ));
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => PlotDetailsPage(
+                title: title,
+                variety: variety,
+                age: age,
+                healthy: healthy,
+              ),
+            ),
+          );
         },
         child: Container(
           margin: const EdgeInsets.symmetric(vertical: 10),
@@ -29,7 +36,11 @@ class PlotManagerPage extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             border: Border.all(color: paleYellow, width: 2),
             boxShadow: [
-              BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 8, offset: const Offset(0, 6)),
+              BoxShadow(
+                color: Colors.black.withOpacity(0.06),
+                blurRadius: 8,
+                offset: const Offset(0, 6),
+              ),
             ],
           ),
           child: Padding(
@@ -44,7 +55,14 @@ class PlotManagerPage extends StatelessWidget {
                     child: Image.asset(
                       'assets/images/plot_pic.png',
                       fit: BoxFit.cover,
-                      errorBuilder: (_, __, ___) => Container(color: Colors.green[50], child: const Icon(Icons.agriculture, color: primaryGreen, size: 44)),
+                      errorBuilder: (_, __, ___) => Container(
+                        color: Colors.green[50],
+                        child: const Icon(
+                          Icons.agriculture,
+                          color: primaryGreen,
+                          size: 44,
+                        ),
+                      ),
                     ),
                   ),
                 ),
@@ -59,7 +77,11 @@ class PlotManagerPage extends StatelessWidget {
                           Expanded(
                             child: Text(
                               title,
-                              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800, color: primaryGreen),
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w800,
+                                color: primaryGreen,
+                              ),
                             ),
                           ),
                           Row(
@@ -67,18 +89,40 @@ class PlotManagerPage extends StatelessWidget {
                               Container(
                                 width: 10,
                                 height: 10,
-                                decoration: BoxDecoration(color: healthy ? Colors.green : Colors.red, shape: BoxShape.circle),
+                                decoration: BoxDecoration(
+                                  color: healthy ? Colors.green : Colors.red,
+                                  shape: BoxShape.circle,
+                                ),
                               ),
                               const SizedBox(width: 6),
-                              Text(healthy ? 'Healthy' : 'Suspected Sheath Blight', style: TextStyle(fontSize: 12, color: Colors.grey[600])),
+                              Text(
+                                healthy ? 'Healthy' : 'Suspected Sheath Blight',
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  color: Colors.grey[600],
+                                ),
+                              ),
                             ],
                           ),
                         ],
                       ),
                       const SizedBox(height: 6),
-                      Text(variety, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.black87)),
+                      Text(
+                        variety,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
                       const SizedBox(height: 4),
-                      Text(age, style: const TextStyle(fontSize: 12, color: Colors.green)),
+                      Text(
+                        age,
+                        style: const TextStyle(
+                          fontSize: 12,
+                          color: Colors.green,
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -100,15 +144,35 @@ class PlotManagerPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // menu icon
-                  IconButton(onPressed: () => Navigator.of(context).pop(), icon: const Icon(Icons.menu, color: Colors.green)),
+                  IconButton(
+                    onPressed: () => Navigator.of(context).pop(),
+                    icon: const Icon(Icons.menu, color: Colors.green),
+                  ),
                   const SizedBox(height: 6),
-                  const Text('Plots', style: TextStyle(fontSize: 40, fontWeight: FontWeight.w900, color: Color(0xFF099509))),
+                  const Text(
+                    'Plots',
+                    style: TextStyle(
+                      fontSize: 40,
+                      fontWeight: FontWeight.w900,
+                      color: Color(0xFF099509),
+                    ),
+                  ),
                   const SizedBox(height: 12),
                   Expanded(
                     child: ListView(
                       children: [
-                        _plotCard(title: 'Plot A', variety: 'Jasmine Rice', age: '20 weeks old', healthy: true),
-                        _plotCard(title: 'Plot B', variety: 'Jasmine Rice', age: '20 weeks old', healthy: false),
+                        _plotCard(
+                          title: 'Plot A',
+                          variety: 'Jasmine Rice',
+                          age: '20 weeks old',
+                          healthy: true,
+                        ),
+                        _plotCard(
+                          title: 'Plot B',
+                          variety: 'Jasmine Rice',
+                          age: '20 weeks old',
+                          healthy: false,
+                        ),
                         const SizedBox(height: 80),
                       ],
                     ),
@@ -133,7 +197,11 @@ class PlotManagerPage extends StatelessWidget {
                       height: MediaQuery.of(ctx).size.height * 0.8,
                       child: const AddPlotOverlay(),
                     ),
-                    shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(18))),
+                    shape: const RoundedRectangleBorder(
+                      borderRadius: BorderRadius.vertical(
+                        top: Radius.circular(18),
+                      ),
+                    ),
                   );
 
                   if (result != null) {
