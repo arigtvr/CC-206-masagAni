@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'favorites.dart';
+import 'article.dart';
 
 class DiscoverScreen extends StatefulWidget {
   const DiscoverScreen({super.key});
@@ -23,11 +24,41 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   String _initialSortBy = 'mostRecent';
   Set<String> _initialLanguages = {};
   Set<String> _initialDiseases = {};
+  
+  // Favorited articles tracking
+  final Map<String, Map<String, String>> _favoritedArticles = {};
 
   @override
   void dispose() {
     _pageController.dispose();
     super.dispose();
+  }
+  
+  void _toggleFavorite(String title, String image, String author, String date) {
+    setState(() {
+      if (_favoritedArticles.containsKey(title)) {
+        _favoritedArticles.remove(title);
+      } else {
+        _favoritedArticles[title] = {
+          'image': image,
+          'author': author,
+          'date': date,
+        };
+      }
+    });
+  }
+  
+  List<Widget> _buildFavoriteCards() {
+    return _favoritedArticles.entries.map((entry) {
+      return _FavoriteCard(
+        image: entry.value['image']!,
+        title: entry.key,
+        author: entry.value['author']!,
+        date: entry.value['date']!,
+        favoritedArticles: _favoritedArticles,
+        onToggleFavoriteGlobal: _toggleFavorite,
+      );
+    }).toList();
   }
   
   bool get _hasFilterChanges {
@@ -139,9 +170,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const FavoritesScreen(),
+                            builder: (context) => FavoritesScreen(
+                              favoritedArticles: _favoritedArticles,
+                              onToggleFavorite: _toggleFavorite,
+                            ),
                           ),
-                        );
+                        ).then((_) => setState(() {}));
                       },
                       style: TextButton.styleFrom(
                         padding: EdgeInsets.zero,
@@ -168,51 +202,53 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
               // Horizontal scrollable favorites
               SizedBox(
                 height: 200,
-                child: PageView(
-                  controller: _pageController,
-                  padEnds: false,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPage = index;
-                    });
-                  },
-                  children: [
-                    _FavoriteCard(
-                      image: 'assets/images/educ/yellow_flags.jpg',
-                      title: 'Yellow Flags: What Rice Yellowing Syndrome Means for Your Crop',
-                      author: 'Hernandez, D.',
-                      date: 'May 2, 2009',
-                    ),
-                    _FavoriteCard(
-                      image: 'assets/images/educ/rice_field.jpg',
-                      title: 'Managing Your Rice Fields',
-                      author: 'Santos, M.',
-                      date: 'June 15, 2010',
-                    ),
-                  ],
-                ),
+                child: _favoritedArticles.isEmpty
+                    ? Center(
+                        child: Padding(
+                          padding: const EdgeInsets.all(24.0),
+                          child: Text(
+                            'No favorites yet. Tap the bookmark icon on articles to add them here!',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              color: Colors.grey[600],
+                              fontSize: 14,
+                            ),
+                          ),
+                        ),
+                      )
+                    : PageView(
+                        controller: _pageController,
+                        padEnds: false,
+                        onPageChanged: (index) {
+                          setState(() {
+                            _currentPage = index;
+                          });
+                        },
+                        children: _buildFavoriteCards(),
+                      ),
               ),
               
               const SizedBox(height: 12),
               
               // Dots indicator
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: List.generate(
-                  2,
-                  (index) => Container(
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    width: 8,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _currentPage == index
-                          ? const Color(0xFF8BC34A)
-                          : Colors.grey[400],
+              if (_favoritedArticles.isNotEmpty)
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: List.generate(
+                    _favoritedArticles.length,
+                    (index) => Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 4),
+                      width: 8,
+                      height: 8,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: _currentPage == index
+                            ? const Color(0xFF8BC34A)
+                            : Colors.grey[400],
+                      ),
                     ),
                   ),
                 ),
-              ),
               
               const SizedBox(height: 24),
               
@@ -241,6 +277,10 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       title: 'Simple Ways to Boost Rice Immunity Naturally',
                       author: 'McKinley, A.',
                       date: 'January 27, 2014',
+                      isFavorited: _favoritedArticles.containsKey('Simple Ways to Boost Rice Immunity Naturally'),
+                      onToggleFavorite: () => _toggleFavorite('Simple Ways to Boost Rice Immunity Naturally', 'assets/images/educ/rice_immunity.jpg', 'McKinley, A.', 'January 27, 2014'),
+                      favoritedArticles: _favoritedArticles,
+                      onToggleFavoriteGlobal: _toggleFavorite,
                     ),
                     const SizedBox(height: 16),
                     _ArticleCard(
@@ -248,27 +288,43 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
                       title: 'Proper Soil Care for Stronger Rice Plants',
                       author: 'Junior, Q.',
                       date: 'April 16, 2011',
+                      isFavorited: _favoritedArticles.containsKey('Proper Soil Care for Stronger Rice Plants'),
+                      onToggleFavorite: () => _toggleFavorite('Proper Soil Care for Stronger Rice Plants', 'assets/images/educ/soil_care.jpg', 'Junior, Q.', 'April 16, 2011'),
+                      favoritedArticles: _favoritedArticles,
+                      onToggleFavoriteGlobal: _toggleFavorite,
                     ),
                     const SizedBox(height: 16),
                     _ArticleCard(
                       image: 'assets/images/educ/sheath_blight.jpg',
                       title: 'Hidden Under the Leaves: Detecting Sheath Blight Early',
                       author: 'Campbell, J.',
-                      date: 'February 22, 2016',
+                      date: 'February 22, 2015',
+                      isFavorited: _favoritedArticles.containsKey('Hidden Under the Leaves: Detecting Sheath Blight Early'),
+                      onToggleFavorite: () => _toggleFavorite('Hidden Under the Leaves: Detecting Sheath Blight Early', 'assets/images/educ/sheath_blight.jpg', 'Campbell, J.', 'February 22, 2015'),
+                      favoritedArticles: _favoritedArticles,
+                      onToggleFavoriteGlobal: _toggleFavorite,
                     ),
                     const SizedBox(height: 16),
                     _ArticleCard(
                       image: 'assets/images/educ/heat_stress.jpg',
                       title: 'Is It Just Heat Stress or Rice Yellowing Syndrome?',
-                      author: 'Kaung, H.',
+                      author: 'Keung, H.',
                       date: 'December 1, 2022',
+                      isFavorited: _favoritedArticles.containsKey('Is It Just Heat Stress or Rice Yellowing Syndrome?'),
+                      onToggleFavorite: () => _toggleFavorite('Is It Just Heat Stress or Rice Yellowing Syndrome?', 'assets/images/educ/heat_stress.jpg', 'Keung, H.', 'December 1, 2022'),
+                      favoritedArticles: _favoritedArticles,
+                      onToggleFavoriteGlobal: _toggleFavorite,
                     ),
                     const SizedBox(height: 16),
                     _ArticleCard(
                       image: 'assets/images/educ/brown_spot.jpg',
-                      title: 'Hidden Under the Leaves: Detecting Sheath Blight Early',
-                      author: 'Junior, Q.',
-                      date: 'April 16, 2011',
+                      title: 'Spotting Brown Spot Disease Before It Spreads',
+                      author: 'Rodriguez, L.',
+                      date: 'March 8, 2018',
+                      isFavorited: _favoritedArticles.containsKey('Spotting Brown Spot Disease Before It Spreads'),
+                      onToggleFavorite: () => _toggleFavorite('Spotting Brown Spot Disease Before It Spreads', 'assets/images/educ/brown_spot.jpg', 'Rodriguez, L.', 'March 8, 2018'),
+                      favoritedArticles: _favoritedArticles,
+                      onToggleFavoriteGlobal: _toggleFavorite,
                     ),
                     const SizedBox(height: 24),
                   ],
@@ -515,31 +571,54 @@ class _FavoriteCard extends StatelessWidget {
   final String title;
   final String author;
   final String date;
+  final Map<String, Map<String, String>> favoritedArticles;
+  final Function(String, String, String, String) onToggleFavoriteGlobal;
 
   const _FavoriteCard({
     required this.image,
     required this.title,
     required this.author,
     required this.date,
+    required this.favoritedArticles,
+    required this.onToggleFavoriteGlobal,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 8),
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+    final bool isFav = favoritedArticles.containsKey(title);
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArticleScreen(
+              image: image,
+              title: title,
+              author: author,
+              date: date,
+              isFavorited: isFav,
+              onToggleFavorite: () => onToggleFavoriteGlobal(title, image, author, date),
+              favoritedArticles: favoritedArticles,
+              onToggleFavoriteGlobal: onToggleFavoriteGlobal,
+            ),
           ),
-        ],
-      ),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(16),
-        child: Stack(
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(horizontal: 8),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(16),
+          child: Stack(
           fit: StackFit.expand,
           children: [
             Image.asset(
@@ -591,6 +670,7 @@ class _FavoriteCard extends StatelessWidget {
               ),
             ),
           ],
+          ),
         ),
       ),
     );
@@ -602,29 +682,55 @@ class _ArticleCard extends StatelessWidget {
   final String title;
   final String author;
   final String date;
+  final bool isFavorited;
+  final VoidCallback onToggleFavorite;
+  final Map<String, Map<String, String>> favoritedArticles;
+  final Function(String, String, String, String) onToggleFavoriteGlobal;
 
   const _ArticleCard({
     required this.image,
     required this.title,
     required this.author,
     required this.date,
+    required this.isFavorited,
+    required this.onToggleFavorite,
+    required this.favoritedArticles,
+    required this.onToggleFavoriteGlobal,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArticleScreen(
+              image: image,
+              title: title,
+              author: author,
+              date: date,
+              isFavorited: isFavorited,
+              onToggleFavorite: onToggleFavorite,
+              favoritedArticles: favoritedArticles,
+              onToggleFavoriteGlobal: onToggleFavoriteGlobal,
+            ),
           ),
-        ],
-      ),
-      child: Row(
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
         children: [
           ClipRRect(
             borderRadius: const BorderRadius.only(
@@ -675,13 +781,17 @@ class _ArticleCard extends StatelessWidget {
           ),
           Padding(
             padding: const EdgeInsets.only(right: 12),
-            child: Icon(
-              Icons.bookmark_border,
-              color: Colors.green[700],
-              size: 24,
+            child: GestureDetector(
+              onTap: onToggleFavorite,
+              child: Icon(
+                isFavorited ? Icons.bookmark : Icons.bookmark_border,
+                color: Colors.green[700],
+                size: 24,
+              ),
             ),
           ),
         ],
+        ),
       ),
     );
   }

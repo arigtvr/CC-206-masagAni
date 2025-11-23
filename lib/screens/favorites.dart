@@ -1,39 +1,20 @@
 import 'package:flutter/material.dart';
+import 'article.dart';
 
 class FavoritesScreen extends StatelessWidget {
-  const FavoritesScreen({super.key});
+  final Map<String, Map<String, String>> favoritedArticles;
+  final Function(String, String, String, String) onToggleFavorite;
+
+  const FavoritesScreen({
+    super.key,
+    required this.favoritedArticles,
+    required this.onToggleFavorite,
+  });
 
   @override
   Widget build(BuildContext context) {
     const Color backgroundColor = Color(0xFFFEFEF1);
     const Color primaryGreen = Color(0xFF099509);
-
-    const List<Map<String, String>> favoriteArticles = [
-      {
-        'image': 'assets/images/educ/rice_immunity.jpg',
-        'title': 'Simple Ways to Boost Rice Immunity Naturally',
-        'author': 'McKinley, A.',
-        'date': 'January 27, 2014',
-      },
-      {
-        'image': 'assets/images/educ/soil_care.jpg',
-        'title': 'Proper Soil Care for Stronger Rice Plants',
-        'author': 'Junior, Q.',
-        'date': 'April 16, 2011',
-      },
-      {
-        'image': 'assets/images/educ/sheath_blight.jpg',
-        'title': 'Hidden Under the Leaves: Detecting Sheath Blight Early',
-        'author': 'Campbell, J.',
-        'date': 'February 22, 2015',
-      },
-      {
-        'image': 'assets/images/educ/rice_yellowing.jpg',
-        'title': 'Is It Just Heat Stress or Rice Yellowing Syndrome?',
-        'author': 'Keung, H.',
-        'date': 'December 1, 2022',
-      },
-    ];
 
     return Scaffold(
       backgroundColor: backgroundColor,
@@ -71,19 +52,44 @@ class FavoritesScreen extends StatelessWidget {
 
             // List of favorite articles
             Expanded(
-              child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 20),
-                itemCount: favoriteArticles.length,
-                itemBuilder: (context, index) {
-                  final article = favoriteArticles[index];
-                  return _FavoriteArticleCard(
-                    image: article['image']!,
-                    title: article['title']!,
-                    author: article['author']!,
-                    date: article['date']!,
-                  );
-                },
-              ),
+              child: favoritedArticles.isEmpty
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.all(40.0),
+                        child: Text(
+                          'You haven\'t added anything to favorites yet.\n\nTap the bookmark icon on articles in the Discover page to save them here!',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: Colors.grey[600],
+                            fontSize: 15,
+                            height: 1.5,
+                          ),
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      padding: const EdgeInsets.symmetric(horizontal: 20),
+                      itemCount: favoritedArticles.length,
+                      itemBuilder: (context, index) {
+                        final entry = favoritedArticles.entries.elementAt(index);
+                        final title = entry.key;
+                        final article = entry.value;
+                        return _FavoriteArticleCard(
+                          image: article['image']!,
+                          title: title,
+                          author: article['author']!,
+                          date: article['date']!,
+                          onToggleFavorite: () => onToggleFavorite(
+                            title,
+                            article['image']!,
+                            article['author']!,
+                            article['date']!,
+                          ),
+                          favoritedArticles: favoritedArticles,
+                          onToggleFavoriteGlobal: onToggleFavorite,
+                        );
+                      },
+                    ),
             ),
           ],
         ),
@@ -97,31 +103,55 @@ class _FavoriteArticleCard extends StatelessWidget {
   final String title;
   final String author;
   final String date;
+  final VoidCallback onToggleFavorite;
+  final Map<String, Map<String, String>> favoritedArticles;
+  final Function(String, String, String, String) onToggleFavoriteGlobal;
 
   const _FavoriteArticleCard({
     required this.image,
     required this.title,
     required this.author,
     required this.date,
+    required this.onToggleFavorite,
+    required this.favoritedArticles,
+    required this.onToggleFavoriteGlobal,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.05),
-            blurRadius: 4,
-            offset: const Offset(0, 2),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => ArticleScreen(
+              image: image,
+              title: title,
+              author: author,
+              date: date,
+              isFavorited: true,
+              onToggleFavorite: onToggleFavorite,
+              favoritedArticles: favoritedArticles,
+              onToggleFavoriteGlobal: onToggleFavoriteGlobal,
+            ),
           ),
-        ],
-      ),
-      child: Row(
+        );
+      },
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(12),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.05),
+              blurRadius: 4,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
         children: [
           // Article thumbnail
           ClipRRect(
@@ -173,13 +203,17 @@ class _FavoriteArticleCard extends StatelessWidget {
           // Bookmark icon
           Container(
             margin: const EdgeInsets.only(left: 8),
-            child: Icon(
-              Icons.bookmark,
-              color: const Color(0xFF099509),
-              size: 24,
+            child: GestureDetector(
+              onTap: onToggleFavorite,
+              child: const Icon(
+                Icons.bookmark,
+                color: Color(0xFF099509),
+                size: 24,
+              ),
             ),
           ),
         ],
+        ),
       ),
     );
   }
