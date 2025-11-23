@@ -44,41 +44,30 @@ class FavoritesScreen extends StatelessWidget {
             // Top bar with back button
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Row(
-                children: [
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(
-                      Icons.arrow_back,
-                      color: primaryGreen,
-                      size: 28,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  const Text(
-                    'Discover',
-                    style: TextStyle(
-                      color: primaryGreen,
-                      fontSize: 20,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                icon: const Icon(
+                  Icons.arrow_back,
+                  color: primaryGreen,
+                  size: 28,
+                ),
               ),
             ),
 
             // Favorites title
             const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+              padding: EdgeInsets.symmetric(horizontal: 24),
               child: Text(
                 'Favorites',
                 style: TextStyle(
                   color: Color(0xFF8BC34A),
-                  fontSize: 32,
+                  fontSize: 36,
                   fontWeight: FontWeight.bold,
                 ),
               ),
             ),
+            
+            const SizedBox(height: 16),
 
             // List of favorite articles
             Expanded(
