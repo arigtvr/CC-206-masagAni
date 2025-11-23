@@ -2,6 +2,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'plot_manager.dart';
 import 'profile.dart';
+import 'discover.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -486,12 +487,31 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Learn More',
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.w700,
-                        color: Colors.black87,
+                    GestureDetector(
+                      onTap: () {
+                        Navigator.of(context).push(
+                          MaterialPageRoute(
+                            builder: (_) => const DiscoverScreen(),
+                          ),
+                        );
+                      },
+                      child: Row(
+                        children: [
+                          const Text(
+                            'Learn More',
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w700,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Icon(
+                            Icons.arrow_forward_ios,
+                            size: 16,
+                            color: Colors.black54,
+                          ),
+                        ],
                       ),
                     ),
                     const SizedBox(height: 12),

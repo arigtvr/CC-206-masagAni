@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'profile.dart';
+import 'claim_history.dart';
 
 class RewardsScreen extends StatelessWidget {
   const RewardsScreen({super.key});
@@ -30,7 +31,13 @@ class RewardsScreen extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        MaterialPageRoute(
+                          builder: (_) => const ClaimHistoryScreen(),
+                        ),
+                      );
+                    },
                     icon: const Icon(
                       Icons.history,
                       color: primaryGreen,
@@ -58,7 +65,7 @@ class RewardsScreen extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   Padding(
-                    padding: const EdgeInsets.only(bottom: 2),
+                    padding: const EdgeInsets.only(bottom: 6),
                     child: _InfoIconWithTooltip(),
                   ),
                 ],
