@@ -21,6 +21,8 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'homepage.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'loading.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -93,11 +95,6 @@ class _LoginScreenState extends State<LoginScreen>
     return null;
   }
 
-<<<<<<< Updated upstream
-  void _submit() {
-    // Direct navigation to HomePage (no auth)
-    Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
-=======
   Future<void> _submit() async {
     // Validate inputs first
     if (!_formKey.currentState!.validate()) return;
@@ -119,10 +116,29 @@ class _LoginScreenState extends State<LoginScreen>
         'Signed in: uid=${userCred.user?.uid}, email=${userCred.user?.email}',
       );
 
+      // Fetch user's first name from Firestore
+      String firstName = 'User';
+      try {
+        final userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(userCred.user?.uid)
+            .get();
+        
+        if (userDoc.exists) {
+          final data = userDoc.data();
+          firstName = data?['firstName'] ?? data?['name']?.split(' ')[0] ?? 'User';
+        }
+      } catch (e) {
+        // ignore: avoid_print
+        print('Error fetching user name: $e');
+      }
+
       if (!mounted) return;
       Navigator.of(
         context,
-      ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+      ).pushReplacement(MaterialPageRoute(
+        builder: (_) => LoadingScreen(firstName: firstName),
+      ));
     } on FirebaseAuthException catch (e) {
       final code = e.code;
       final message = e.message ?? 'Authentication error';
@@ -143,7 +159,6 @@ class _LoginScreenState extends State<LoginScreen>
     } finally {
       if (mounted) setState(() => _loading = false);
     }
->>>>>>> Stashed changes
   }
 
   // Utility to compute responsive widths
