@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class AddPlotOverlay extends StatefulWidget {
   const AddPlotOverlay({super.key});
@@ -11,6 +13,7 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
   final TextEditingController _titleCtrl = TextEditingController();
   DateTime _selected = DateTime.now();
   String _selectedType = 'Jasmine Rice';
+  bool _saving = false;
 
   final List<String> _types = [
     'Jasmine Rice',
@@ -49,7 +52,7 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
 
     Widget content = Container(
       decoration: const BoxDecoration(
-        color: paleYellow,
+        color: Color(0xFFFDFDD0),
         borderRadius: BorderRadius.vertical(top: Radius.circular(18)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
@@ -57,23 +60,50 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const SizedBox(height: 6),
-          const Text('New Plot', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: primaryGreen)),
+          const Text(
+            'New Plot',
+            style: TextStyle(
+              fontSize: 28,
+              fontWeight: FontWeight.w900,
+              color: primaryGreen,
+            ),
+          ),
           const SizedBox(height: 18),
 
           // Title label & field
-          const Text('Title', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: labelGold)),
+          const Text(
+            'Title',
+            style: TextStyle(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+              color: primaryGreen,
+            ),
+          ),
           TextField(
             controller: _titleCtrl,
             decoration: const InputDecoration(
-              border: UnderlineInputBorder(borderSide: BorderSide(color: primaryGreen)),
-              enabledBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryGreen)),
-              focusedBorder: UnderlineInputBorder(borderSide: BorderSide(color: primaryGreen, width: 2)),
+              border: UnderlineInputBorder(
+                borderSide: BorderSide(color: primaryGreen),
+              ),
+              enabledBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: primaryGreen),
+              ),
+              focusedBorder: UnderlineInputBorder(
+                borderSide: BorderSide(color: primaryGreen, width: 2),
+              ),
             ),
           ),
           const SizedBox(height: 18),
 
           // Date row with calendar button
-          const Text('Date', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: primaryGreen)),
+          const Text(
+            'Date',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: primaryGreen,
+            ),
+          ),
           const SizedBox(height: 6),
           Row(
             children: [
@@ -85,10 +115,18 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
                     children: [
                       Text(
                         _formatDate(_selected),
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: labelGold),
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: labelGold,
+                        ),
                       ),
                       const SizedBox(height: 6),
-                      Container(height: 2, color: primaryGreen.withOpacity(0.75), width: double.infinity),
+                      Container(
+                        height: 2,
+                        color: primaryGreen.withOpacity(0.75),
+                        width: double.infinity,
+                      ),
                     ],
                   ),
                 ),
@@ -102,7 +140,10 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
                 child: Container(
                   width: 44,
                   height: 44,
-                  decoration: const BoxDecoration(color: primaryGreen, shape: BoxShape.circle),
+                  decoration: const BoxDecoration(
+                    color: primaryGreen,
+                    shape: BoxShape.circle,
+                  ),
                   child: const Icon(Icons.calendar_today, color: Colors.white),
                 ),
               ),
@@ -112,7 +153,14 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
           const SizedBox(height: 18),
 
           // Type label
-          const Text('Type', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: primaryGreen)),
+          const Text(
+            'Type',
+            style: TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: primaryGreen,
+            ),
+          ),
           const SizedBox(height: 8),
 
           // Types grid (two columns of radio items)
@@ -121,18 +169,30 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
               child: Wrap(
                 spacing: 16,
                 runSpacing: 6,
-                children: _types.map((t) => SizedBox(
-                  width: (MediaQuery.of(context).size.width - 64) / 2,
-                  child: RadioListTile<String>(
-                    contentPadding: EdgeInsets.zero,
-                    value: t,
-                    groupValue: _selectedType,
-                    onChanged: (v) => setState(() => _selectedType = v ?? _selectedType),
-                    title: Text(t, style: const TextStyle(fontSize: 13, color: Colors.black87)),
-                    dense: true,
-                    activeColor: primaryGreen.withOpacity(0.8),
-                  ),
-                )).toList(),
+                children: _types
+                    .map(
+                      (t) => SizedBox(
+                        width: (MediaQuery.of(context).size.width - 64) / 2,
+                        child: RadioListTile<String>(
+                          contentPadding: EdgeInsets.zero,
+                          value: t,
+                          groupValue: _selectedType,
+                          onChanged: (v) => setState(
+                            () => _selectedType = v ?? _selectedType,
+                          ),
+                          title: Text(
+                            t,
+                            style: const TextStyle(
+                              fontSize: 13,
+                              color: Colors.black87,
+                            ),
+                          ),
+                          dense: true,
+                          activeColor: primaryGreen.withOpacity(0.8),
+                        ),
+                      ),
+                    )
+                    .toList(),
               ),
             ),
           ),
@@ -143,22 +203,97 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
             child: SizedBox(
               width: 180,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: wire saving logic
-                  Navigator.of(context).pop({'title': _titleCtrl.text, 'date': _selected, 'type': _selectedType});
-                },
+                onPressed: _saving
+                    ? null
+                    : () async {
+                        final title = _titleCtrl.text.trim();
+                        if (title.isEmpty) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please enter a title for the plot',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        final user = FirebaseAuth.instance.currentUser;
+                        if (user == null) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'You must be signed in to save a plot',
+                              ),
+                            ),
+                          );
+                          return;
+                        }
+
+                        setState(() => _saving = true);
+
+                        final data = {
+                          'title': title,
+                          'date': Timestamp.fromDate(_selected),
+                          'type': _selectedType,
+                          'ownerUid': user.uid,
+                          'createdAt': FieldValue.serverTimestamp(),
+                        };
+
+                        try {
+                          await FirebaseFirestore.instance
+                              .collection('users')
+                              .doc(user.uid)
+                              .collection('plots')
+                              .add(data);
+
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Plot saved')),
+                          );
+                          Navigator.of(context).pop({
+                            'title': title,
+                            'date': _selected,
+                            'type': _selectedType,
+                          });
+                        } catch (e) {
+                          if (!mounted) return;
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Error saving plot: $e')),
+                          );
+                        } finally {
+                          if (mounted) setState(() => _saving = false);
+                        }
+                      },
                 style: ButtonStyle(
-                  backgroundColor: MaterialStateProperty.resolveWith<Color?>((states) {
+                  backgroundColor: MaterialStateProperty.resolveWith<Color?>((
+                    states,
+                  ) {
                     const base = Color(0xFFF9ED96); // requested color
                     const hover = Color(0xFFE6D870); // slightly darker
-                    if (states.contains(MaterialState.pressed) || states.contains(MaterialState.hovered)) return hover;
+                    if (states.contains(MaterialState.pressed) ||
+                        states.contains(MaterialState.hovered))
+                      return hover;
                     return base;
                   }),
                   elevation: MaterialStateProperty.all(0),
-                  padding: MaterialStateProperty.all(const EdgeInsets.symmetric(vertical: 10)),
-                  shape: MaterialStateProperty.all(RoundedRectangleBorder(borderRadius: BorderRadius.circular(12))),
+                  padding: MaterialStateProperty.all(
+                    const EdgeInsets.symmetric(vertical: 10),
+                  ),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
                 ),
-                child: Text('Add Plot', style: TextStyle(color: primaryGreen, fontWeight: FontWeight.w700, fontSize: 16)),
+                child: Text(
+                  'Add Plot',
+                  style: TextStyle(
+                    color: primaryGreen,
+                    fontWeight: FontWeight.w700,
+                    fontSize: 16,
+                  ),
+                ),
               ),
             ),
           ),
@@ -168,9 +303,15 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
 
     if (routeAnimation != null) {
       // slide from bottom + fade-in using the route's animation and a curve
-      final curved = CurvedAnimation(parent: routeAnimation, curve: Curves.easeOutCubic);
+      final curved = CurvedAnimation(
+        parent: routeAnimation,
+        curve: Curves.easeOutCubic,
+      );
       return SlideTransition(
-        position: Tween<Offset>(begin: const Offset(0, 1), end: Offset.zero).animate(curved),
+        position: Tween<Offset>(
+          begin: const Offset(0, 1),
+          end: Offset.zero,
+        ).animate(curved),
         child: FadeTransition(opacity: routeAnimation, child: content),
       );
     }
@@ -186,12 +327,25 @@ class _AddPlotOverlayState extends State<AddPlotOverlay> {
   }
 
   String _weekdayName(int w) {
-    const names = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-    return names[(w-1) % 7];
+    const names = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    return names[(w - 1) % 7];
   }
 
   String _monthName(int m) {
-    const names = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return names[(m-1) % 12];
+    const names = [
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
+    ];
+    return names[(m - 1) % 12];
   }
 }

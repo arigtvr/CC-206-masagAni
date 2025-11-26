@@ -16,26 +16,28 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'YOUR_API_KEY',
-    appId: 'YOUR_APP_ID',
-    messagingSenderId: 'YOUR_SENDER_ID',
-    projectId: 'YOUR_PROJECT_ID',
+    apiKey: 'AIzaSyBsy9Edl6YRSucwmSX5xZL_crnAPRVyAbc',
+    appId: '1:335612678883:web:335bd597d98c1cc38c6bd6',
+    messagingSenderId: '335612678883',
+    projectId: 'masagani-app-206',
+    authDomain: 'masagani-app-206.firebaseapp.com',
+    storageBucket: 'masagani-app-206.firebasestorage.app',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: '...',
-    appId: '...',
-    messagingSenderId: '...',
-    projectId: '...',
+    apiKey: 'AIzaSyA6OfjVq7YfyF61C_qZ6C2lxES1qt1srZA',
+    appId: '1:335612678883:android:776936caf61d16dc8c6bd6',
+    messagingSenderId: '335612678883',
+    projectId: 'masagani-app-206',
+    storageBucket: 'masagani-app-206.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: '...',
-    appId: '...',
-    messagingSenderId: '...',
-    projectId: '...',
-    iosBundleId: '...',
-    androidClientId: '...',
-    iosClientId: '...',
+    apiKey: 'AIzaSyCHpAXrNyqWxoCXTGoe-7Cst0rUlHA5t30',
+    appId: '1:335612678883:ios:7a3f5e39dc5a5b4b8c6bd6',
+    messagingSenderId: '335612678883',
+    projectId: 'masagani-app-206',
+    storageBucket: 'masagani-app-206.firebasestorage.app',
+    iosBundleId: 'com.example.flutterCc206Masagani',
   );
 }

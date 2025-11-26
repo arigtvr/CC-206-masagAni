@@ -38,6 +38,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   icons_plus: ^5.0.0
   font_awesome_flutter: ^10.7.0
+  qr_flutter: ^4.0.0
 
 dev_dependencies:
   flutter_test:
@@ -64,7 +65,7 @@ flutter:
   assets:
     - assets/images/
     - assets/images/welcomepage.png
-    - assets/images/loading.jpg
+    - assets/images/loading.png
     - assets/images/masagani.png
     - assets/images/home_bg.jpg
     - assets/images/masagani_logoname.png
@@ -72,6 +73,8 @@ flutter:
     - assets/images/educ/rys_home.jpg
     - assets/images/Widget_icon.png
     - assets/images/manageplot_home.png
+    - assets/images/loading.png
+    - assets/images/alejandro_icon.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images

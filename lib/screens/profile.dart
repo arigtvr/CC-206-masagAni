@@ -1,10 +1,102 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'welcome_screen.dart';
 import 'edit_profile.dart';
 import 'homepage.dart';
+import 'plot_manager.dart';
+import 'rewards.dart';
+import 'discover.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  String _displayName = '';
+  String _firstName = '';
+  String _lastName = '';
+  int _totalPoints = 1890;
+  int _streakDisplay = 150;
+  StreamSubscription<DocumentSnapshot>? _profileSub;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfile();
+    _startProfileListener();
+  }
+
+  Future<void> _loadProfile() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    // Try to read Firestore profile
+    try {
+      final doc = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(user.uid)
+          .get();
+      if (doc.exists) {
+        final data = doc.data()!;
+        setState(() {
+          _firstName = (data['firstName'] ?? '') as String;
+          _lastName = (data['lastName'] ?? '') as String;
+          _displayName =
+              (data['displayName'] ?? user.displayName ?? '') as String;
+          _totalPoints = (data['totalPoints'] ?? 1890) as int;
+        });
+      } else {
+        setState(() {
+          _displayName = user.displayName ?? '';
+        });
+      }
+    } catch (_) {
+      setState(() {
+        _displayName = user.displayName ?? '';
+      });
+    }
+  }
+
+  void _startProfileListener() {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+    _profileSub = FirebaseFirestore.instance
+        .collection('users')
+        .doc(user.uid)
+        .snapshots(includeMetadataChanges: true)
+        .listen(
+          (doc) {
+            if (doc.exists) {
+              final data = doc.data()!;
+              setState(() {
+                _firstName = (data['firstName'] ?? '') as String;
+                _lastName = (data['lastName'] ?? '') as String;
+                _displayName =
+                    (data['displayName'] ??
+                            FirebaseAuth.instance.currentUser?.displayName ??
+                            '')
+                        as String;
+                _totalPoints = (data['totalPoints'] ?? 1890) as int;
+              });
+            }
+          },
+          onError: (_) {
+            // keep last known values
+          },
+        );
+  }
+
+  @override
+  void dispose() {
+    _profileSub?.cancel();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -105,9 +197,9 @@ class ProfileScreen extends StatelessWidget {
               // Name and Edit
               Column(
                 children: [
-                  const Text(
-                    'Alejandro Villanueva',
-                    style: TextStyle(
+                  Text(
+                    _displayName.isNotEmpty ? _displayName : 'Your Name',
+                    style: const TextStyle(
                       fontFamily: 'Gotham',
                       fontSize: 22,
                       color: Color(0xFF0B8A12),
@@ -117,12 +209,14 @@ class ProfileScreen extends StatelessWidget {
                   const SizedBox(height: 6),
                   GestureDetector(
                     behavior: HitTestBehavior.opaque,
-                    onTap: () {
-                      Navigator.of(context).push(
+                    onTap: () async {
+                      await Navigator.of(context).push(
                         MaterialPageRoute(
                           builder: (_) => const EditProfileScreen(),
                         ),
                       );
+                      // Reload profile after edit
+                      await _loadProfile();
                     },
                     child: const Text(
                       '✎ Edit Profile',
@@ -200,7 +294,7 @@ class ProfileScreen extends StatelessWidget {
                                 crossAxisAlignment: CrossAxisAlignment.center,
                                 children: [
                                   Text(
-                                    '153',
+                                    _streakDisplay.toString(),
                                     style: TextStyle(
                                       fontSize: 36,
                                       color: primaryGreen,
@@ -236,7 +330,7 @@ class ProfileScreen extends StatelessWidget {
                                   ),
                                   const SizedBox(width: 8),
                                   Text(
-                                    '1250',
+                                    _totalPoints.toString(),
                                     style: TextStyle(
                                       fontSize: 18,
                                       color: primaryGreen,
@@ -252,19 +346,49 @@ class ProfileScreen extends StatelessWidget {
 
                       const SizedBox(height: 18),
 
-                      // Simple timeline indicator
+                      // Simple timeline indicator — streak graphic with labels (150-154)
                       Column(
                         children: [
-                          // Single streak image spanning 150-154, with the
-                          // day numbers shown below spaced evenly.
                           Column(
                             children: [
                               Image.asset(
                                 'assets/images/streak_day_count.png',
-                                // wider so the streak bar appears fuller across 150-154
-                                width: 800,
+                                width: double.infinity,
                                 height: 75,
                                 fit: BoxFit.fitWidth,
+                              ),
+                              const SizedBox(height: 3),
+                              // Numbers aligned under the streak graphic
+                              // Use small horizontal offsets to tweak label positions.
+                              Builder(
+                                builder: (context) {
+                                  final offsets = <double>[
+                                    -4.0,
+                                    -2.0,
+                                    0.0,
+                                    2.0,
+                                    4.0,
+                                  ];
+                                  return Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: List.generate(5, (index) {
+                                      final dx = (index < offsets.length)
+                                          ? offsets[index]
+                                          : 0.0;
+                                      return Transform.translate(
+                                        offset: Offset(dx, 0),
+                                        child: Text(
+                                          '${150 + index}',
+                                          style: const TextStyle(
+                                            fontSize: 11,
+                                            color: Colors.black54,
+                                          ),
+                                        ),
+                                      );
+                                    }),
+                                  );
+                                },
                               ),
                               const SizedBox(height: 12),
                             ],
@@ -276,16 +400,26 @@ class ProfileScreen extends StatelessWidget {
                           SizedBox(
                             width: 160,
                             height: 44,
-                            child: ElevatedButton(
-                              onPressed: () {},
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.amber[200],
-                                foregroundColor: Colors.brown[800],
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(6),
+                            child: SizedBox(
+                              width: 160,
+                              height: 44,
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  Navigator.of(context).push(
+                                    MaterialPageRoute(
+                                      builder: (_) => const RewardsScreen(),
+                                    ),
+                                  );
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.amber[200],
+                                  foregroundColor: Colors.brown[800],
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
                                 ),
+                                child: const Text('Redeem Rewards'),
                               ),
-                              child: const Text('Redeem Rewards'),
                             ),
                           ),
                         ],
@@ -360,6 +494,11 @@ class _ProfileDrawerState extends State<_ProfileDrawer> {
                   onTap: () {
                     _select('Plots');
                     Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (_) => const PlotManagerPage(),
+                      ),
+                    );
                   },
                 ),
                 _HoverListTile(
@@ -368,6 +507,9 @@ class _ProfileDrawerState extends State<_ProfileDrawer> {
                   onTap: () {
                     _select('Discover');
                     Navigator.of(context).pop();
+                    Navigator.of(context).push(
+                      MaterialPageRoute(builder: (_) => const DiscoverScreen()),
+                    );
                   },
                 ),
                 _HoverListTile(

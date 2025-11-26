@@ -16,10 +16,11 @@
 // Make sure you have font_awesome_flutter in pubspec and fonts registered as you described.
 
 import 'dart:async';
-import 'package:flutter/foundation.dart' show kIsWeb;
+// foundation import removed (no web hover behavior)
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'homepage.dart';
+// removed social icon dependency (social-login UI removed)
+import 'loading.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,6 +35,7 @@ class _LoginScreenState extends State<LoginScreen>
   final TextEditingController _emailCtrl = TextEditingController();
   final TextEditingController _passCtrl = TextEditingController();
   bool _obscure = true;
+  bool _loading = false;
 
   // Animations
   late final AnimationController _animController;
@@ -91,11 +93,66 @@ class _LoginScreenState extends State<LoginScreen>
     return null;
   }
 
-  void _submit() {
-    // Direct navigation to HomePage (no auth)
-    Navigator.of(
-      context,
-    ).pushReplacement(MaterialPageRoute(builder: (_) => const HomePage()));
+  Future<void> _submit() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (!mounted) return;
+    setState(() => _loading = true);
+
+    final email = _emailCtrl.text.trim();
+    final password = _passCtrl.text;
+
+    try {
+      final userCred = await FirebaseAuth.instance.signInWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+
+      // Signed in successfully
+      // ignore: avoid_print
+      print(
+        'Signed in: uid=${userCred.user?.uid}, email=${userCred.user?.email}',
+      );
+      if (!mounted) return;
+
+      // derive a first name to show in loading screen (displayName or email prefix)
+      final firstName =
+          userCred.user?.displayName ??
+          (userCred.user?.email?.split('@').first ?? '');
+
+      // Navigate to LoadingScreen for 3 seconds, then LoadingScreen will route to HomePage
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(
+            builder: (_) =>
+                LoadingScreen(firstName: firstName, durationMillis: 3000),
+          ),
+        );
+      }
+    } on FirebaseAuthException catch (e) {
+      final code = e.code;
+      final message = e.message ?? 'Authentication error';
+      if (mounted) {
+        if (code == 'user-not-found') {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('No account found for that email. Please sign up.'),
+            ),
+          );
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Login error [$code]: $message')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Unexpected error: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _loading = false);
+    }
   }
 
   // Utility to compute responsive widths
@@ -105,34 +162,12 @@ class _LoginScreenState extends State<LoginScreen>
     return 300;
   }
 
-  double _computeButtonWidth(double deviceWidth) {
-    if (deviceWidth < 360) return deviceWidth * 0.66;
-    if (deviceWidth < 420) return deviceWidth * 0.58;
-    return 220;
-  }
-
-  // Social icon builder with hover & tap scale animation
-  Widget _buildSocialIcon({
-    required IconData icon,
-    required Color iconColor,
-    required VoidCallback onTap,
-    double radius = 22,
-  }) {
-    return _HoverTapScale(
-      child: CircleAvatar(
-        radius: radius,
-        backgroundColor: Colors.white,
-        child: FaIcon(icon, color: iconColor, size: radius - 6),
-      ),
-      onTap: onTap,
-    );
-  }
+  // Social-login removed; no helper needed.
 
   @override
   Widget build(BuildContext context) {
     // Colors & theme values
     const Color primaryGreen = Color(0xFF099509);
-    final Color primaryGreen75 = primaryGreen.withOpacity(0.75);
     const Color strokeGreen = Color(0xFF77C000);
     const Color hintGray = Color(0xFF9A9292);
     const Color bgBase = Color(0xFFFEFEF1);
@@ -141,7 +176,6 @@ class _LoginScreenState extends State<LoginScreen>
     // Responsive sizes
     final double deviceWidth = MediaQuery.of(context).size.width;
     final double fieldWidth = _computeFieldWidth(deviceWidth);
-    final double buttonWidth = _computeButtonWidth(deviceWidth);
 
     // Text scale factor for accessibility / small screens
     final double textScale = MediaQuery.of(
@@ -318,20 +352,35 @@ class _LoginScreenState extends State<LoginScreen>
                               width: fieldWidth,
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: _submit,
+                                onPressed: _loading ? null : _submit,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: primaryGreen,
                                   shape: RoundedRectangleBorder(
                                     borderRadius: BorderRadius.circular(5),
                                   ),
                                 ),
-                                child: const Text(
-                                  'Login',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.white,
-                                  ),
-                                ),
+                                child: _loading
+                                    ? const SizedBox(
+                                        width: 20,
+                                        height: 20,
+                                        child: CircularProgressIndicator(
+                                          strokeWidth: 2,
+                                          valueColor:
+                                              AlwaysStoppedAnimation<Color>(
+                                                Colors.white,
+                                              ),
+                                        ),
+                                      )
+                                    : const Text(
+                                        'LOGIN',
+                                        style: TextStyle(
+                                          fontFamily: 'Gotham',
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.w700,
+                                          color: Colors.white,
+                                          letterSpacing: 1.2,
+                                        ),
+                                      ),
                               ),
                             ),
                           ],
@@ -340,76 +389,6 @@ class _LoginScreenState extends State<LoginScreen>
                     ),
 
                     const Spacer(),
-
-                    // "Or login with" label
-                    Text(
-                      'Or login with',
-                      style: const TextStyle(
-                        fontFamily: 'Inter',
-                        color: hintGray,
-                        fontSize: 13,
-                      ),
-                    ),
-
-                    const SizedBox(height: 10),
-
-                    // Social icons row (A: Google, B: Facebook, C: Apple, D: GitHub, E: Twitter)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Google (red-ish colored icon)
-                        _buildSocialIcon(
-                          icon: FontAwesomeIcons.google,
-                          iconColor: const Color(0xFFDB4437),
-                          onTap: () {
-                            // TODO: implement Google auth
-                          },
-                        ),
-                        const SizedBox(width: 12),
-
-                        // Facebook (facebook blue)
-                        _buildSocialIcon(
-                          icon: FontAwesomeIcons.facebookF,
-                          iconColor: const Color(0xFF1877F2),
-                          onTap: () {
-                            // TODO: implement Facebook auth
-                          },
-                        ),
-                        const SizedBox(width: 12),
-
-                        // Apple (black)
-                        _buildSocialIcon(
-                          icon: FontAwesomeIcons.apple,
-                          iconColor: Colors.black,
-                          onTap: () {
-                            // TODO: implement Apple auth
-                          },
-                        ),
-                        const SizedBox(width: 12),
-
-                        // GitHub (black)
-                        _buildSocialIcon(
-                          icon: FontAwesomeIcons.github,
-                          iconColor: Colors.black,
-                          onTap: () {
-                            // TODO: implement GitHub auth
-                          },
-                        ),
-
-                        const SizedBox(width: 12),
-
-                        // Twitter/X (twitter blue)
-                        _buildSocialIcon(
-                          icon: FontAwesomeIcons.twitter,
-                          iconColor: const Color(0xFF1DA1F2),
-                          onTap: () {
-                            // TODO: implement Twitter auth
-                          },
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 30),
                   ],
                 ),
               ),
@@ -423,79 +402,4 @@ class _LoginScreenState extends State<LoginScreen>
 
 /// Widget that provides hover (for web) and tap scale animation.
 /// It scales down slightly on tap, and grows a bit on hover (web).
-class _HoverTapScale extends StatefulWidget {
-  final Widget child;
-  final VoidCallback? onTap;
-  final double hoverScale;
-  final double tapScale;
-  final Duration duration;
-
-  const _HoverTapScale({
-    required this.child,
-    this.onTap,
-    this.hoverScale = 1.06,
-    this.tapScale = 0.92,
-    this.duration = const Duration(milliseconds: 120),
-  });
-
-  @override
-  State<_HoverTapScale> createState() => _HoverTapScaleState();
-}
-
-class _HoverTapScaleState extends State<_HoverTapScale>
-    with SingleTickerProviderStateMixin {
-  double _scale = 1.0;
-  bool _hovering = false;
-
-  void _onEnter(bool hover) {
-    if (!mounted) return;
-    setState(() {
-      _hovering = hover;
-      _scale = hover ? widget.hoverScale : 1.0;
-    });
-  }
-
-  void _onTapDown(TapDownDetails _) {
-    setState(() => _scale = widget.tapScale);
-  }
-
-  void _onTapUp(TapUpDetails _) {
-    setState(() => _scale = _hovering ? widget.hoverScale : 1.0);
-  }
-
-  void _onTapCancel() {
-    setState(() => _scale = _hovering ? widget.hoverScale : 1.0);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final child = GestureDetector(
-      onTapDown: _onTapDown,
-      onTapUp: _onTapUp,
-      onTapCancel: _onTapCancel,
-      onTap: widget.onTap,
-      behavior: HitTestBehavior.translucent,
-      child: AnimatedScale(
-        scale: _scale,
-        duration: widget.duration,
-        curve: Curves.easeOut,
-        child: widget.child,
-      ),
-    );
-
-    // Only use MouseRegion hover effects when running on web or desktop
-    if (kIsWeb ||
-        Theme.of(context).platform == TargetPlatform.macOS ||
-        Theme.of(context).platform == TargetPlatform.windows ||
-        Theme.of(context).platform == TargetPlatform.linux) {
-      return MouseRegion(
-        onEnter: (_) => _onEnter(true),
-        onExit: (_) => _onEnter(false),
-        cursor: SystemMouseCursors.click,
-        child: child,
-      );
-    }
-
-    return child;
-  }
-}
+// Hover/tap animation removed with social-login UI.
