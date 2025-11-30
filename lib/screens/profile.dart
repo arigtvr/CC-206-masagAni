@@ -21,6 +21,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   String _displayName = '';
   String _firstName = '';
   String _lastName = '';
+  String _avatar = 'man';
   int _totalPoints = 1890;
   int _streakDisplay = 150;
   StreamSubscription<DocumentSnapshot>? _profileSub;
@@ -49,11 +50,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _lastName = (data['lastName'] ?? '') as String;
           _displayName =
               (data['displayName'] ?? user.displayName ?? '') as String;
+          _avatar = (data['avatar'] ?? 'man') as String;
           _totalPoints = (data['totalPoints'] ?? 1890) as int;
         });
       } else {
         setState(() {
           _displayName = user.displayName ?? '';
+          _avatar = 'man';
         });
       }
     } catch (_) {
@@ -82,6 +85,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                             FirebaseAuth.instance.currentUser?.displayName ??
                             '')
                         as String;
+                _avatar = (data['avatar'] ?? 'man') as String;
                 _totalPoints = (data['totalPoints'] ?? 1890) as int;
               });
             }
@@ -174,16 +178,20 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   // overlap the white content below. Use a top offset that
                   // keeps the circle visible within the 160px header.
                   Positioned(
-                    top: 85,
-                    child: CircleAvatar(
-                      radius: 28,
-                      backgroundColor: Colors.white,
+                    top: 79,
+                    child: GestureDetector(
+                      onTap: _changeAvatar,
                       child: CircleAvatar(
-                        radius: 56,
+                        radius: 36,
                         backgroundColor: Colors.white,
-                        // Show Alejandro icon image (drop this file into assets/images)
-                        backgroundImage: const AssetImage(
-                          'assets/images/alejandro_icon.png',
+                        child: CircleAvatar(
+                          radius: 52,
+                          backgroundColor: Colors.white,
+                          backgroundImage: AssetImage(
+                            _avatar == 'woman'
+                                ? 'assets/images/alexandra_icon.png'
+                                : 'assets/images/alejandro_icon.png',
+                          ),
                         ),
                       ),
                     ),
@@ -436,6 +444,72 @@ class _ProfileScreenState extends State<ProfileScreen> {
       ),
     );
   }
+
+  Future<void> _changeAvatar() async {
+    // show a bottom sheet to choose between Man/Woman
+    final choice = await showModalBottomSheet<String>(
+      context: context,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(12)),
+          ),
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text(
+                'Choose Avatar',
+                style: TextStyle(
+                  fontFamily: 'Gotham',
+                  fontSize: 18,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 12),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundImage: AssetImage(
+                    'assets/images/alejandro_icon.png',
+                  ),
+                ),
+                title: const Text('Man'),
+                onTap: () => Navigator.of(ctx).pop('man'),
+              ),
+              ListTile(
+                leading: const CircleAvatar(
+                  backgroundImage: AssetImage(
+                    'assets/images/alexandra_icon.png',
+                  ),
+                ),
+                title: const Text('Woman'),
+                onTap: () => Navigator.of(ctx).pop('woman'),
+              ),
+              const SizedBox(height: 8),
+            ],
+          ),
+        );
+      },
+    );
+
+    if (choice == null) return;
+
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) return;
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'avatar': choice,
+      }, SetOptions(merge: true));
+      setState(() {
+        _avatar = choice;
+      });
+    } catch (e) {
+      // ignore errors silently for now; could show SnackBar
+    }
+  }
 }
 
 class _ProfileDrawer extends StatefulWidget {
@@ -520,6 +594,7 @@ class _ProfileDrawerState extends State<_ProfileDrawer> {
                     Navigator.of(context).pop();
                   },
                 ),
+
                 const Spacer(),
                 const Divider(),
                 _HoverListTile(
@@ -541,6 +616,30 @@ class _ProfileDrawerState extends State<_ProfileDrawer> {
         ),
       ),
     );
+  }
+
+  Future<void> _resetPoints() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Not signed in')));
+      return;
+    }
+
+    try {
+      await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+        'totalPoints': 1890,
+      }, SetOptions(merge: true));
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('totalPoints reset to 1890')),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Failed to reset points: $e')));
+    }
   }
 }
 
@@ -635,5 +734,15 @@ class _HoverListTileState extends State<_HoverListTile> {
         ),
       ),
     );
+  }
+}
+
+// Public wrapper so other screens can reuse the same drawer UI.
+class ProfileDrawer extends StatelessWidget {
+  const ProfileDrawer({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return const _ProfileDrawer();
   }
 }

@@ -624,11 +624,17 @@ class _RewardCard extends StatelessWidget {
                       // Prevent duplicate active reward codes: check for existing unused reward with same title
                       final user = FirebaseAuth.instance.currentUser;
                       if (user == null) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(
-                            content: Text('Please sign in to redeem'),
-                          ),
-                        );
+                        // If caller provided an onRedeem (e.g. navigate to sign-in), run it.
+                        // Otherwise show a helpful message.
+                        try {
+                          onRedeem();
+                        } catch (_) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Please sign in to redeem'),
+                            ),
+                          );
+                        }
                         return;
                       }
 
@@ -1121,21 +1127,28 @@ class _RedeemDialog extends StatelessWidget {
         final userId = segments[1];
         final userRef = firestore.collection('users').doc(userId);
         final userSnap = await tx.get(userRef);
+        // If the user's totalPoints is missing in Firestore, treat it as 1890
+        // (restore default balance). This makes vouchers redeemable by
+        // users who don't yet have an explicit totalPoints field.
         final currentPoints =
             (userSnap.exists &&
                 (userSnap.data() as Map<String, dynamic>)['totalPoints'] !=
                     null)
             ? (userSnap.data() as Map<String, dynamic>)['totalPoints'] as int
-            : 0;
+            : 1890;
         final redeemPoints = (data['points'] ?? points) as int;
         if (currentPoints < redeemPoints) {
           throw Exception('Insufficient Agri Points to redeem this voucher.');
         }
 
-        // decrement user's totalPoints
-        tx.update(userRef, {
-          'totalPoints': FieldValue.increment(-redeemPoints),
-        });
+        // compute new total based on the transaction-read value and write
+        // the explicit new value. This avoids relying on FieldValue.increment
+        // which treats a missing field as 0 (causing -300 when we expect
+        // a default starting balance of 1890).
+        final newTotal = currentPoints - redeemPoints;
+        tx.set(userRef, {
+          'totalPoints': newTotal,
+        }, SetOptions(merge: true));
 
         // mark reward used and set redeemedAt (server timestamp)
         tx.update(rewardRef, {

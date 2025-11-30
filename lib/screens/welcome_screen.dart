@@ -100,7 +100,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 15),
+                const SizedBox(height: 12),
 
                 // SIGN UP BUTTON (navigates to signup)
                 // SIGN UP BUTTON (navigate to signup)
@@ -119,10 +119,6 @@ class WelcomeScreen extends StatelessWidget {
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(5),
                       ),
-                    ),
-                    child: const Text(
-                      "Sign Up",
-                      style: TextStyle(fontSize: 16, color: Colors.white),
                     ),
                   ),
                 ),
