@@ -397,14 +397,8 @@ class _ArticleScreenState extends State<ArticleScreen> {
                         ),
                         const SizedBox(height: 28),
                       ] else ...[
-                        const Text(
-                          'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.',
-                          textAlign: TextAlign.justify,
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.black87,
-                            height: 1.6,
-                          ),
+                        _buildDiseaseIntro(
+                          'This article provides valuable insights and practical knowledge for rice farmers and agricultural professionals. Our team continuously researches and compiles information to help improve rice cultivation practices.',
                         ),
                         const SizedBox(height: 24),
                       ],
@@ -438,7 +432,10 @@ class _ArticleScreenState extends State<ArticleScreen> {
                           
                           Padding(
                             padding: const EdgeInsets.only(left: 16),
-                            child: RichText(
+                            child: Text(
+                              _isTranslated
+                                  ? '• Brown Lesions (Kayumangging Peklat sa Dahon) – Maliliit na bilog hanggang pahabang batik na lumalaki at nagiging kayumangging sugat na may kulay abong gitna at madilim na gilid.\n\n• Leaf Blighting (Pagkalanta ng Dahon) – Sa matinding impeksyon, mabilis na natutuyo ang mga dahon at bumababa ang kakayahang mag-photosynthesize.\n\n• Seedling Blight (Pagkabulok ng Punla) – Nagpapakita ang mga punla ng kayumangging kulay, paghina, at pagkamatay, na nagreresulta sa hindi pantay na pagtatanim.\n\n• Reduced Tillering (Kulang sa Sanga) – Nalilimitahan ang paglago dahil sa stress at pinsala sa tisyu.\n\n• Poor Grain Filling (Mahinang Pagbubutil) – Nagbubunga ang mga palay ng magagaan at kulubot na butil dahil sa kawalan ng sapat na paglipat ng nutrisyon.'
+                                  : '• Brown Leaf Spots (Kayumangging Peklat sa Dahon) – Small to large oval or circular lesions with dark brown borders and gray to tan centers, commonly appearing on older leaves.\n\n• Leaf Blight (Pagkalanta ng Dahon) – Extensive necrosis leading to premature leaf senescence and reduced photosynthetic area, especially under severe infection.\n\n• Seedling Rot (Pagkabulok ng Punla) – Brown to black lesions on seed coats, coleoptiles, and young roots, resulting in poor germination and stunted seedlings.\n\n• Reduced Tillering (Kulang sa Sanga) – Limited tiller production due to overall plant weakening and nutrient stress.\n\n• Poor Grain Filling (Mahinang Pagbubutil) – Infection of panicles and glumes leads to incomplete or malformed grains, reducing overall yield and quality.',
                               textAlign: TextAlign.justify,
                               text: TextSpan(
                                 style: const TextStyle(
@@ -492,60 +489,28 @@ class _ArticleScreenState extends State<ArticleScreen> {
                           Row(
                             children: [
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => _ImageGallery(
-                                          initialIndex: 0,
-                                          imagePaths: const [
-                                            'assets/images/diseases/rys/rysdiagnosis.jpg',
-                                            'assets/images/diseases/rys/ryscomp.jpg',
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      'assets/images/diseases/rys/rysdiagnosis.jpg',
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        height: 200,
-                                        color: Colors.green[200],
-                                      ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    'assets/images/diseases/rys/rysdiagnosis.jpg',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      height: 200,
+                                      color: Colors.green[200],
                                     ),
                                   ),
                                 ),
                               ),
                               const SizedBox(width: 12),
                               Expanded(
-                                child: GestureDetector(
-                                  onTap: () {
-                                    Navigator.push(
-                                      context,
-                                      MaterialPageRoute(
-                                        builder: (_) => _ImageGallery(
-                                          initialIndex: 1,
-                                          imagePaths: const [
-                                            'assets/images/diseases/rys/rysdiagnosis.jpg',
-                                            'assets/images/diseases/rys/ryscomp.jpg',
-                                          ],
-                                        ),
-                                      ),
-                                    );
-                                  },
-                                  child: ClipRRect(
-                                    borderRadius: BorderRadius.circular(8),
-                                    child: Image.asset(
-                                      'assets/images/diseases/rys/ryscomp.jpg',
-                                      fit: BoxFit.cover,
-                                      errorBuilder: (_, __, ___) => Container(
-                                        height: 200,
-                                        color: Colors.green[200],
-                                      ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(8),
+                                  child: Image.asset(
+                                    'assets/images/diseases/rys/ryscomp.jpg',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      height: 200,
+                                      color: Colors.green[200],
                                     ),
                                   ),
                                 ),
@@ -558,17 +523,6 @@ class _ArticleScreenState extends State<ArticleScreen> {
                             style: TextStyle(fontSize: 10, color: Colors.black54, fontStyle: FontStyle.italic),
                           ),
                           const SizedBox(height: 28),
-                        ] else ...[
-                          const Text(
-                            'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper',
-                            textAlign: TextAlign.justify,
-                            style: TextStyle(
-                              fontSize: 14,
-                              color: Colors.black87,
-                              height: 1.6,
-                            ),
-                          ),
-                          const SizedBox(height: 20),
                         ],
                       ],
                       
@@ -837,6 +791,90 @@ class _ArticleScreenState extends State<ArticleScreen> {
                               ),
                             ],
                           ),
+                          const SizedBox(height: 16),
+
+                          Text(
+                            _isTranslated
+                                ? '6. Linisin ang kagamitan at limitahan ang paggalaw sa bukid'
+                                : '6. Clean Equipment and Limit Field Movement',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: darkGreen,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Text(
+                              _isTranslated
+                                  ? 'Para hindi mailipat ang sclerotia sa mas malinis na bahagi.'
+                                  : 'To prevent transfer of sclerotia to cleaner areas.',
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.black87,
+                                height: 1.8,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          Text(
+                            _isTranslated
+                                ? '7. Maagang anihin ang sobrang tinamaan'
+                                : '7. Early Harvest for Severely Affected Areas',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: darkGreen,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Text(
+                              _isTranslated
+                                  ? 'Kung umabot sa panicles ang impeksiyon, nakakapagligtas ito ng grain quality.'
+                                  : 'If infection reaches panicles, this can salvage grain quality.',
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.black87,
+                                height: 1.8,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
+                          Text(
+                            _isTranslated
+                                ? '8. I-dokumento ang pinsala'
+                                : '8. Document the Damage',
+                            style: const TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: darkGreen,
+                              height: 1.5,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Padding(
+                            padding: const EdgeInsets.only(left: 16),
+                            child: Text(
+                              _isTranslated
+                                  ? 'Gamitin para sa susunod na cropping season: variety choice, residue management, at planting density.'
+                                  : 'Use for next cropping season: variety choice, residue management, and planting density.',
+                              textAlign: TextAlign.justify,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: Colors.black87,
+                                height: 1.8,
+                              ),
+                            ),
+                          ),
                           const SizedBox(height: 28),
                         ],
                         
@@ -1064,7 +1102,11 @@ class _ArticleScreenState extends State<ArticleScreen> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.asset(
-                                      'assets/images/diseases/rys/sheathcover.jpg',
+                                      isBrownSpot || isBrownSpotEarly
+                                          ? 'assets/images/diseases/brown/brown5.webp'
+                                          : isSheathBlight
+                                          ? 'assets/images/diseases/sb/sb2.jpg'
+                                          : 'assets/images/diseases/rys/sheathcover.jpg',
                                       height: 76,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
@@ -1078,7 +1120,11 @@ class _ArticleScreenState extends State<ArticleScreen> {
                                   ClipRRect(
                                     borderRadius: BorderRadius.circular(8),
                                     child: Image.asset(
-                                      'assets/images/educ/rys_home.jpg',
+                                      isBrownSpot || isBrownSpotEarly
+                                          ? 'assets/images/diseases/brown/brown6.webp'
+                                          : isSheathBlight
+                                          ? 'assets/images/diseases/sb/sbb.png'
+                                          : 'assets/images/educ/rys_home.jpg',
                                       height: 76,
                                       width: double.infinity,
                                       fit: BoxFit.cover,
@@ -1093,7 +1139,9 @@ class _ArticleScreenState extends State<ArticleScreen> {
                             ),
                           ],
                         ),
-                      if (!isRYS) ...[
+                      if (!isDiseaseArticle &&
+                          !isBoostImmunity &&
+                          !isSoilCare) ...[
                         const SizedBox(height: 20),
                         const Text(
                           'Lorem ipsum dolor sit amet consectetur adipiscing elit. Quisque faucibus ex sapien vitae pellentesque sem placerat. In id cursus mi pretium tellus duis convallis. Tempus leo eu aenean sed diam urna tempor. Pulvinar vivamus fringilla lacus nec metus bibendum egestas. Iaculis massa nisl malesuada lacinia integer nunc posuere. Ut hendrerit semper vel class aptent taciti sociosqu. Ad litora torquent per conubia nostra inceptos himenaeos.',
@@ -1219,7 +1267,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
                     // Action buttons
                     Row(
                       children: [
-                        if (isRYS) ...[
+                        if (isRYS || isBrownSpot || isSheathBlight) ...[
                           Container(
                             width: 36,
                             height: 36,
@@ -1285,7 +1333,7 @@ class _ArticleScreenState extends State<ArticleScreen> {
         'date': 'February 22, 2015',
       },
       {
-        'image': 'assets/images/diseases/rys/ryspaddy.png',
+        'image': 'assets/images/educ/is-it-just-heat.jpg',
         'title': 'Is It Just Heat Stress or Rice Yellowing Syndrome?',
         'author': 'Keung, H.',
         'date': 'December 1, 2022',
